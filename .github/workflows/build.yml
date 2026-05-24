@@ -38,4 +38,4 @@ jobs:
       - name: SonarQube Scan (LOCAL CLI)
         shell: powershell
         run: |
-          sonar-scanner -Dsonar.host.url=http://localhost:9000 -Dsonar.token=${{ secrets.SONAR_TOKEN }} -Dsonar.projectKey=test-local-sonar -Dsonar.sources=.
+          & "C:\sonar-scanner\bin\sonar-scanner.bat" -Dsonar.host.url=http://localhost:9000 -Dsonar.token=${{ secrets.SONAR_TOKEN }} -Dsonar.projectKey=test-local-sonar -Dsonar.sources=.
