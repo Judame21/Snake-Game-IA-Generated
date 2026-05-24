@@ -11,22 +11,15 @@ jobs:
   build_and_analyze:
     runs-on: self-hosted
 
-    env:
-      SONAR_HOST_URL: "http://localhost:9000"
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # ✅ Usar Python LOCAL (no descargar desde GitHub)
       - name: Check Python
         shell: powershell
         run: |
           python --version
 
-      # ✅ Instalar dependencias
       - name: Install dependencies
         shell: powershell
         run: |
@@ -34,17 +27,20 @@ jobs:
           if (Test-Path "requirements.txt") { pip install -r requirements.txt }
           pip install pytest coverage pytest-cov
 
-      # ✅ Tests + coverage
-      - name: Run tests + coverage reports
+      - name: Run tests
         shell: powershell
         run: |
-          pytest --junitxml=pytest-report.xml --disable-warnings
+          pytest --disable-warnings
           coverage run -m pytest
           coverage xml -o coverage.xml
 
-      # ✅ SonarQube local
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v7
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+      # ✅ IMPORTANTE: Scanner LOCAL (SIN action)
+      - name: SonarQube Scan (LOCAL CLI)
+        shell: powershell
+        run: |
+          sonar-scanner ^
+            -Dsonar.host.url=http://localhost:9000 ^
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }} ^
+            -Dsonar.projectKey=test-local-sonar ^
+            -Dsonar.sources=.
+``
