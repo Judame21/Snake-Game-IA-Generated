@@ -43,4 +43,3 @@ jobs:
             -Dsonar.token=${{ secrets.SONAR_TOKEN }} ^
             -Dsonar.projectKey=test-local-sonar ^
             -Dsonar.sources=.
-``
