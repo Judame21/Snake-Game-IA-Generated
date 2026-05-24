@@ -1,0 +1,53 @@
+name: Build and analyze (Self-hosted + Local SonarQube)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  build_and_analyze:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check Python
+        shell: powershell
+        run: |
+          python --version
+
+      - name: Install dependencies
+        shell: powershell
+        run: |
+          python -m pip install --upgrade pip
+          if (Test-Path "requirements.txt") { pip install -r requirements.txt }
+          pip install pytest coverage pytest-cov
+
+      - name: Run tests + coverage
+        shell: powershell
+        run: |
+          pytest --junitxml=pytest-report.xml --disable-warnings
+          coverage run -m pytest
+          coverage xml -o coverage.xml
+
+      # ✅ Opción 1: agregar SonarScanner al PATH para el resto del job
+      - name: Add SonarScanner to PATH (workflow)
+        shell: powershell
+        run: |
+          "C:\sonar-scanner\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      # ✅ Ejecutar usando sonar-scanner.bat ya disponible por PATH
+      - name: SonarQube Scan (LOCAL CLI)
+        shell: powershell
+        run: |
+          sonar-scanner.bat `
+            -D "sonar.host.url=http://localhost:9000" `
+            -D "sonar.token=${{ secrets.SONAR_TOKEN }}" `
+            -D "sonar.projectKey=Snake" `
+            -D "sonar.sources=."
