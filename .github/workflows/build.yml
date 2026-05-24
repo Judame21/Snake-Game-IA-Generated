@@ -37,7 +37,7 @@ jobs:
 
       # Ejecuta tests + reportes que SonarQube importa
       - name: Run tests + coverage reports
-        shell: pwsh
+        shell: powershell
         run: |
           pytest --junitxml=pytest-report.xml --disable-warnings
           coverage run -m pytest
