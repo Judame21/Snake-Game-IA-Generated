@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Check Python
         shell: powershell
@@ -34,8 +36,7 @@ jobs:
           coverage run -m pytest
           coverage xml -o coverage.xml
 
-      # ✅ SonarScanner LOCAL (versión corregida)
       - name: SonarQube Scan (LOCAL CLI)
         shell: powershell
         run: |
-          & "C:\sonar-scanner\bin\sonar-scanner.bat" -Dsonar.host.url=http://localhost:9000 -Dsonar.token=${{ secrets.SONAR_TOKEN }} -Dsonar.projectKey=test-local-sonar -Dsonar.sources=.
+          & "C:\sonar-scanner\bin\sonar-scanner.bat" -Dsonar.host.url="http://localhost:9000" -Dsonar.token="${{ secrets.SONAR_TOKEN }}" -Dsonar.projectKey="test-local-sonar" -Dsonar.sources="."
