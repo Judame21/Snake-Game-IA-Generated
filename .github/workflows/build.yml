@@ -9,7 +9,6 @@ on:
 
 jobs:
   build_and_analyze:
-    # Solución 1: el runner corre en TU PC, así que localhost:9000 sí funciona
     runs-on: self-hosted
 
     env:
@@ -21,13 +20,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Python
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      # ✅ Usar Python LOCAL (no descargar desde GitHub)
+      - name: Check Python
+        shell: powershell
+        run: |
+          python --version
 
-      # Instala dependencias (Windows/Linux)
+      # ✅ Instalar dependencias
       - name: Install dependencies
         shell: powershell
         run: |
@@ -35,7 +34,7 @@ jobs:
           if (Test-Path "requirements.txt") { pip install -r requirements.txt }
           pip install pytest coverage pytest-cov
 
-      # Ejecuta tests + reportes que SonarQube importa
+      # ✅ Tests + coverage
       - name: Run tests + coverage reports
         shell: powershell
         run: |
@@ -43,7 +42,7 @@ jobs:
           coverage run -m pytest
           coverage xml -o coverage.xml
 
-      # SonarQube Scan (Server local)
+      # ✅ SonarQube local
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v7
         env:
