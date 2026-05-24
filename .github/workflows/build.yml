@@ -1,27 +1,49 @@
-name: Build
+name: Build and analyze (Local SonarQube)
 
 on:
   push:
     branches:
       - main
-
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
 jobs:
-  build:
-    name: Build and analyze
-    runs-on: windows-latest
-    
+  build_and_analyze:
+    # Solución 1: usar runner self-hosted (instalado en tu PC)
+    # Si tu runner tiene etiquetas extra (por ejemplo "windows"), puedes usar:
+    # runs-on: [self-hosted, windows]
+    runs-on: self-hosted
+
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
+          # Recomendado para mejor relevancia del análisis
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pytest coverage pytest-cov
+
+      - name: Run tests + coverage (reports for SonarQube)
+        shell: bash
+        run: |
+          pytest --junitxml=pytest-report.xml --disable-warnings -q || true
+          coverage run -m pytest -q || true
+          coverage xml -o coverage.xml || true
+
+      - name: SonarQube Scan (local server)
+        uses: SonarSource/sonarqube-scan-action@v7
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      # If you wish to fail your job when the Quality Gate is red, uncomment the
-      # following lines. This would typically be used to fail a deployment.
-      # - uses: SonarSource/sonarqube-quality-gate-action@cf038b0e0cdecfa9e56c198bbb7d21d751d62c3b # v1.2.0
-      #   timeout-minutes: 5
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: http://localhost:9000
