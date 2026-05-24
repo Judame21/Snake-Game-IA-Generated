@@ -34,12 +34,8 @@ jobs:
           coverage run -m pytest
           coverage xml -o coverage.xml
 
-      # ✅ IMPORTANTE: Scanner LOCAL (SIN action)
+      # ✅ SonarScanner LOCAL (versión corregida)
       - name: SonarQube Scan (LOCAL CLI)
         shell: powershell
         run: |
-          sonar-scanner ^
-            -Dsonar.host.url=http://localhost:9000 ^
-            -Dsonar.token=${{ secrets.SONAR_TOKEN }} ^
-            -Dsonar.projectKey=test-local-sonar ^
-            -Dsonar.sources=.
+          sonar-scanner -Dsonar.host.url=http://localhost:9000 -Dsonar.token=${{ secrets.SONAR_TOKEN }} -Dsonar.projectKey=test-local-sonar -Dsonar.sources=.
