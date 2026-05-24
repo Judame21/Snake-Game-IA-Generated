@@ -49,5 +49,5 @@ jobs:
           sonar-scanner.bat `
             -D "sonar.host.url=http://localhost:9000" `
             -D "sonar.token=${{ secrets.SONAR_TOKEN }}" `
-            -D "sonar.projectKey=test-local-sonar" `
+            -D "sonar.projectKey=Snake" `
             -D "sonar.sources=."
